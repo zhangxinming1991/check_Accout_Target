@@ -8,9 +8,15 @@
 </head>
 <body>
 	Test_SendMail<br>
-		<form name="Test_SendMail_form" action="/check_Accout/PMController/forgetandsendmail" method ="post">
-		用户名:<input type="text" name="bank_id" value="47"><br>
-		<input type="text" name="pay_id" value=""><button name="get_vercode">获取验证码</button><br>
+	<form name="Test_SendMail_form" action="/check_Accout/PMController/getresetpwdverifycode" method ="post">
+		用户名:<input type="text" name="username" value="z1234"><br>
+	             验证方式:<input type="text" name="verify_way" value="mail"><br>
+		<input type="submit" name="test" value="获取验证码">
+	</form>
+	
+	<form name="Test_SendMail_form" action="/check_Accout/PMController/forgetandsendmail" method ="post">
+		用户名:<input type="text" name="username" value="z1234"><br>
+	             验证码:<input type="text" name="verify_code" value=""><br>
 		<input type="submit" name="test" value="下一步">
 	</form>
 </body>
