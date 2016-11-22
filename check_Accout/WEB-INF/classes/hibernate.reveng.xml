@@ -2,7 +2,6 @@
 <!DOCTYPE hibernate-reverse-engineering PUBLIC "-//Hibernate/Hibernate Reverse Engineering DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-reverse-engineering-3.0.dtd" >
 
 <hibernate-reverse-engineering>
-	<table-filter match-name="assistance" match-catalog="check_a_db"></table-filter>
 	<table-filter match-name="bank_input" match-catalog="check_a_db"></table-filter>
 	<table-filter match-name="connect_person"
 		match-catalog="check_a_db">
@@ -33,4 +32,5 @@
 	<table-filter match-name="cus_sdstore_backup"
 		match-catalog="check_a_db">
 	</table-filter>
+	<table-filter match-name="assistance" match-catalog="check_a_db"></table-filter>
 </hibernate-reverse-engineering>

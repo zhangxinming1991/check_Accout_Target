@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
-<!-- Generated 2016-11-11 9:13:29 by Hibernate Tools 5.1.0.Beta1 -->
+<!-- Generated 2016-11-20 11:19:12 by Hibernate Tools 5.1.0.Beta1 -->
 <hibernate-mapping>
     <class name="entity.PayRecord" table="pay_record" catalog="check_a_db" optimistic-lock="version">
         <id name="id" type="java.lang.Integer">
@@ -24,7 +24,7 @@
             </column>
         </property>
         <property name="payAccount" type="string">
-            <column name="pay_account" length="11">
+            <column name="pay_account" length="30">
                 <comment>&#184;&#182;&#191;&#238;&#213;&#203;&#187;&#167;</comment>
             </column>
         </property>
@@ -32,7 +32,7 @@
             <column name="vicePayer" length="15" />
         </property>
         <property name="receiver" type="string">
-            <column name="receiver" length="15">
+            <column name="receiver" length="60">
                 <comment>&#191;&#238;&#207;&#238;&#189;&#211;&#202;&#220;&#200;&#203;</comment>
             </column>
         </property>

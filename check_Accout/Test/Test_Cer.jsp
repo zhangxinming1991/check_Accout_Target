@@ -8,11 +8,9 @@
 </head>
 <body>
 	Test_Cer<br>
-		<form name="Test_Map_form" action="/check_Accout/Check_MainController/Map" method ="post">
-		bank_id:<input type="text" name="bank_id" value="47"><br>
-		pay_id<input type="text" name="pay_id" value="7"><br>
-		<input type="hidden" name="map_op" value="cer_map"><br>
-		<input type="submit" name"test" value="test_cer">
+		<form name="Test_Map_form" action="/check_Accout/PMController/ResetPwd" method ="post">
+		重新输入新的密码:<input type="password" name="password" value=""><br>
+		确认新的密码：<input type="password" name="pwd_again" value=""><br>
 	</form>
 </body>
 </html>
