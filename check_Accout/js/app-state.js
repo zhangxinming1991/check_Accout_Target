@@ -8,7 +8,6 @@ app.config(['$stateProvider', '$urlRouterProvider', 'stateHelperProvider', funct
     $urlRouterProvider.when('/u/fs', '/u/fs/a');
     $urlRouterProvider.when('/u/fw/p--', ['$state', function (state) {
         var thisDate = new Date();
-       // state.go('u.fw.p', {year: thisDate.getFullYear(), month: thisDate.getMonth()});
         state.go('u.fw.p', {year: thisDate.getFullYear(), month: thisDate.getMonth()+1});
     }]);
     $urlRouterProvider.otherwise('/index');
@@ -205,7 +204,7 @@ app.config(['$stateProvider', '$urlRouterProvider', 'stateHelperProvider', funct
                     , {
                         name: 'd',
                         url: '/d',
-                        template: '<div><p class="text-center h3">数据库操作</p><br><a class="btn btn-primary text-center " ng-click="backupDB()">备份数据库</a></div>',
+                        templateUrl: 'fs-db.html',
                         controller: fsdCtrl
                     }
                 ]

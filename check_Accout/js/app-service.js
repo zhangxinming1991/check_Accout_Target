@@ -58,7 +58,7 @@ app.factory('HttpReqService', ['$http', '$q', function (http, Q) {
                     }
                     deferred.resolve(okfnc(resbody));
                 } else {
-                    //console.log('negative resbody:', resbody);
+                    console.log('negative resbody:', resbody);
                     errfnc = errfnc || function (resbody) {
                             return {msg: resbody.errmsg || '网络请求错误，无详细错误信息'};
                         };
@@ -73,7 +73,7 @@ app.factory('HttpReqService', ['$http', '$q', function (http, Q) {
             console.error(expt);
             deferred.reject({msg: '网络或系统错误'});
         }
-        //console.log('req result:', deferred.promise);
+        console.log('req result:', deferred.promise);
         return deferred.promise;
     };
     return svc;

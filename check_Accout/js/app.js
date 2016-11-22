@@ -40,7 +40,7 @@ var ReqUrl = {
     // 重新对账
     reCheck: '/check_Accout/Check_MainController/ClAndStAgain_CheckA'
     // 历史对账结果中的重新对账操作
-    ,recheck2:'/check_Accout/Check_MainController/historyca'
+    , recheck2: '/check_Accout/Check_MainController/historyca'
     // 认可对账结果操作
     , accChkRlt: '/check_Accout/Check_MainController/freeback'
     // // 新付款通知信息（用户上传）数目
@@ -69,9 +69,34 @@ var ReqUrl = {
 
     // 备份数据库操作
     , backupdb: '/check_Accout/PMController/backupdb'
+    // 恢复数据库
+    , restoredb: '/check_Accout/PMController/verify_backup'
+    // 已备份数据库列表
+    , dbbackups: '/check_Accout/PMController/choose_backup'
     // 日志获取
     , viewLog: '/check_Accout/PMController/watch'
     // 获取代理商列表
     , fetchAgents: '/check_Accout/PMController/get_agentcodeAname'
 };
 
+// string format
+String.prototype.format = function()
+{
+    var args = arguments;
+    return this.replace(/\{(\d+)\}/g,
+        function(m,i){
+            return args[i];
+        });
+};
+//static
+String.format = function() {
+    if( arguments.length == 0 )
+        return null;
+
+    var str = arguments[0];
+    for(var i=1;i<arguments.length;i++) {
+        var re = new RegExp('\\{' + (i-1) + '\\}','gm');
+        str = str.replace(re, arguments[i]);
+    }
+    return str;
+};

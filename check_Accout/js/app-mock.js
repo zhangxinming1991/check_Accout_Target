@@ -4,21 +4,27 @@
 console.log('mock backend...');
 
 document.write('<script src="js/angular-mocks.js"></script>');
-
 // add requirement
 app.requires.push('ngMockE2E');
+
+var assert = console.assert;
 
 // var delay = 2000;
 var delay = 0;
 app.config(function ($provide) {
     $provide.decorator('$httpBackend', function ($delegate) {
         var proxy = function (method, url, data, callback, headers) {
-            var encrypedReq = method === 'POST';
+            var encrypedReq = method === 'POST' && url != ReqUrl.fwOrderUpload;
             if (encrypedReq) {
                 // console.log('request data(before decrypted):', data);
                 data = Decrypt(data);
                 console.log('request data(decrypted):', data);
             }
+            var jsonReq = data !== undefined && url != ReqUrl.fwOrderUpload;
+            if (jsonReq) {
+                data = JSON.parse(data);
+            }
+
             var interceptor = function () {
                 var _this = this,
                     _arguments = arguments;
@@ -105,7 +111,7 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
     // sign in
     bkd.whenPOST(ReqUrl.signIn).respond(function (method, url, reqBody) {
         // data is a string of request
-        reqBody = JSON.parse(reqBody);
+        // reqBody = JSON.parse(reqBody);
         console.log('mock backend->login: ', reqBody);
 
         var resUser = {
@@ -113,6 +119,8 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
             "role": reqBody.from,
             "name": '三毛' + reqBody.uid
             // more info
+            , phone: '13312348'
+            , email: 'aabcdwfe@a.com'
         };
         var uid = reqBody.uid;
         // if (uid.indexOf('u') != -1) {
@@ -150,10 +158,14 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
 
     // sign up
     bkd.whenPOST(ReqUrl.signUp).respond(function (method, url, reqBody) {
-        reqBody = JSON.parse((reqBody));
+        // reqBody = JSON.parse((reqBody));
         console.log('mock backend-> register: ', reqBody);
 
-        return [200, {flag: failOrNot(), user: {uid: 'gg'}}];
+        if (reqBody.username.indexOf('exist') > -1) {
+            return [200, {flag: -1, errmsg: '用户名已存在'}];
+        }
+
+        return [200, {flag: failOrNot(), user: {uid: reqBody.uid}}];
     });
 
     // sign out
@@ -263,7 +275,7 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
     // });
 
     bkd.whenPOST(ReqUrl.fwFncReminds, function (reqbody) {
-        reqbody = JSON.parse(reqbody);
+        // reqbody = JSON.parse(reqbody);
         return reqbody.table_name == 'payrecord';
     }).respond(function () {
         console.log('mock backend-> 待审付款通知');
@@ -310,7 +322,7 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
     // 付款通知审核通过操作
     bkd.whenPOST(ReqUrl.fwPaymentNotifApprov).respond(function (method, url, reqBody) {
         console.log('mock backend->待审付款通知“通过”');
-        reqBody = JSON.parse(reqBody);
+        // reqBody = JSON.parse(reqBody);
         var resbody = {flag: failOrNot()};
         // switch (reqBody.op_result) {
         //     case "Yes":
@@ -420,7 +432,7 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
 
     bkd.whenPOST(ReqUrl.fwAssocTrans).respond(function (method, url, reqBody) {
         console.log('mock backend -> associate 关联出纳到订单或客户');
-        reqBody = JSON.parse(reqBody);
+        // reqBody = JSON.parse(reqBody);
         var resbody = {};
         if (reqBody.srcId.indexOf('fail') >= 0) {
             resbody.flag = -1;
@@ -432,19 +444,19 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
     });
 
     bkd.whenPOST(ReqUrl.attachToTransCandidates, /.*"map_op":"find_map".*/).respond(function (method, url, reqbody) {
-        reqbody = JSON.parse(reqbody);
+        // reqbody = JSON.parse(reqbody);
         console.log("mock backend->待关联付款通知的出纳候选集", reqbody);
         return [200, {flag: failOrNot(), data: transcash(5)}, {}];
     });
 
     bkd.whenPOST(ReqUrl.attachToTrans, /.*"map_op":"cer_map".*/).respond(function (method, url, reqBody) {
-        reqBody = JSON.parse(reqBody);
+        // reqBody = JSON.parse(reqBody);
         console.log('mock backend -> 关联付款通知到出纳', reqBody);
         return [200, {flag: failOrNot()}, {}];
     });
 
     bkd.whenPOST(ReqUrl.checkWork, function (reqbody) {
-        reqbody = JSON.parse(reqbody);
+        // reqbody = JSON.parse(reqbody);
         return reqbody.caid;
     }).respond(function (method, url, reqbody) {
         console.log('mock -> 对账操作', reqbody);
@@ -456,7 +468,7 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
     }
 
     bkd.whenPOST(ReqUrl.checkResult).respond(function (method, url, reqbody) {
-        reqbody = JSON.parse(reqbody);
+        // reqbody = JSON.parse(reqbody);
         console.log('mock backend -> 对账结果', reqbody);
 
         var resdata;
@@ -592,7 +604,7 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
 
     // 对账历史
     bkd.whenPOST(ReqUrl.historyResults, function (reqbody) {
-        reqbody = JSON.parse(reqbody);
+        // reqbody = JSON.parse(reqbody);
         return reqbody.watch_type == "T" && reqbody.table_name == "caresult_history" && reqbody.year
     }).respond(function (method, url, reqbody) {
         console.log('mock backend-> 历史对账结果查询', reqbody);
@@ -608,15 +620,15 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
     });
 
     bkd.whenPOST(ReqUrl.reCheck, function (reqbody) {
-        reqbody = JSON.parse(reqbody);
-        expect(reqbody.caid).toEqual(session.caid);
+        // reqbody = JSON.parse(reqbody);
+        assert(reqbody.caid === session.caid, reqbody.caid, session.caid);
         return reqbody.caid;
     }).respond(function (method, url, reqbody) {
         console.log('mock backend-> 重新对账环境准备', reqbody)
         return [200, {flag: failOrNot(), caid: newCaid()}, {}];
     });
 
-    bkd.whenPOST(ReqUrl.accChkRlt).respond(function () {
+    bkd.whenPOST(ReqUrl.accChkRlt).respond(function (method, url, reqbody) {
         console.log('mock backend->“返利”');
         return [200, {flag: failOrNot()}];
     });
@@ -628,7 +640,7 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
 
     bkd.whenPOST(ReqUrl.recheck2).respond(function () {
         console.log('mock backend->重新对账（2）')
-        return [200, {flag: failOrNot(), caid: newCaid()}];
+        return [200, {flag: failOrNot(), /* caid: newCaid()*/}];
     });
 
     //
@@ -640,7 +652,7 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
     // });
 
     bkd.whenPOST(ReqUrl.notifView, function (reqbody) {
-        reqbody = JSON.parse(reqbody);
+        // reqbody = JSON.parse(reqbody);
         return reqbody.watch_type == 'T' && reqbody.table_name == 'pay_cache';
     }).respond(function (method, url, reqbody) {
         console.log('mock backend->预览付款通知数据（用户上传）');
@@ -698,7 +710,7 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
     }
 
     bkd.whenPOST(ReqUrl.regPendingNotifiers, function (reqbody) {
-        reqbody = JSON.parse(reqbody);
+        // reqbody = JSON.parse(reqbody);
         return reqbody.watch_type == 'reg_cp';
     }).respond(function () {
         var resdata = regNotifiers(20);
@@ -706,7 +718,7 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
     });
 
     bkd.whenPOST(ReqUrl.regPendingFworkers, function (reqbody) {
-        reqbody = JSON.parse(reqbody);
+        // reqbody = JSON.parse(reqbody);
         return reqbody.watch_type == 'reg_as';
     }).respond(function () {
         var resdata = regFworkers(20);
@@ -714,7 +726,7 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
     });
 
     bkd.whenPOST(ReqUrl.approveNotifier, function (reqbody) {
-        reqbody = JSON.parse(reqbody);
+        // reqbody = JSON.parse(reqbody);
         return reqbody.id && reqbody.reg_type == 'cp' && reqbody.regflag == 0
     }).respond(function () {
         console.log('mock backend->审阅对账联系人注册（通过）');
@@ -722,7 +734,7 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
     });
 
     bkd.whenPOST(ReqUrl.approveNotifier, function (reqbody) {
-        reqbody = JSON.parse(reqbody);
+        // reqbody = JSON.parse(reqbody);
         return reqbody.id && reqbody.reg_type == 'cp' && reqbody.regflag == -2
     }).respond(function () {
         console.log('mock backend->审阅对账联系人注册（拒绝）');
@@ -730,7 +742,7 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
     });
 
     bkd.whenPOST(ReqUrl.approveFw, function (reqbody) {
-        reqbody = JSON.parse(reqbody);
+        // reqbody = JSON.parse(reqbody);
         return reqbody.id && reqbody.reg_type == 'as' && reqbody.regflag == 0;
     }).respond(function () {
         console.log('mock backend->审阅代理商注册（通过）');
@@ -738,7 +750,7 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
     });
 
     bkd.whenPOST(ReqUrl.approveFw, function (reqbody) {
-        reqbody = JSON.parse(reqbody);
+        // reqbody = JSON.parse(reqbody);
         return reqbody.id && reqbody.reg_type == 'as' && reqbody.regflag == -2
     }).respond(function () {
         console.log('mock backend->审阅代理商注册（拒绝）');
@@ -746,7 +758,7 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
     });
 
     bkd.whenPOST(ReqUrl.notifiers, function (reqbody) {
-        reqbody = JSON.parse(reqbody);
+        // reqbody = JSON.parse(reqbody);
         return reqbody.watch_type == 'reged_cp';
     }).respond(function () {
         console.log('mock backend->已注册对账联系人获取');
@@ -758,7 +770,7 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
     });
 
     bkd.whenPOST(ReqUrl.fworkers, function (reqbody) {
-        reqbody = JSON.parse(reqbody);
+        // reqbody = JSON.parse(reqbody);
         return reqbody.watch_type == 'reged_as';
     }).respond(function () {
         console.log('mock backend->已注册代理商财务员获取');
@@ -770,14 +782,14 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
     });
 
     bkd.whenPOST(ReqUrl.ctrlNotifier, function (reqbody) {
-        reqbody = JSON.parse(reqbody);
+        // reqbody = JSON.parse(reqbody);
         return reqbody.id && reqbody.control_type == 'cp' && reqbody.ctlflag !== undefined;
     }).respond(function () {
         console.log('mock backend->管控对账联系人');
         return [200, {flag: failOrNot()}, {}];
     });
     bkd.whenPOST(ReqUrl.ctrlNotifier, function (reqbody) {
-        reqbody = JSON.parse(reqbody);
+        // reqbody = JSON.parse(reqbody);
         return reqbody.id && reqbody.control_type == 'as' && reqbody.ctlflag !== undefined;
     }).respond(function () {
         console.log('mock backend->管控代理商财务员');
@@ -785,8 +797,27 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
     });
 
     bkd.whenPOST(ReqUrl.backupdb).respond(function () {
+        console.log('mock backend->备份数据库');
         return [200, {flag: failOrNot()}];
     });
+    bkd.whenPOST(ReqUrl.dbbackups).respond(function () {
+        console.log('mock backend->数据库备份文件列表');
+        var resdata = [];
+        for (i = 1; i <= 12; i++) {
+            var t = {
+                id: uuid()
+                ,
+                filename: '2016_' + randInRange(1, 12) + '_' + randInRange(1, 31) + '_' + randInRange(0, 23) + '_' + randInRange(0, 59) + '_' + randInRange(0, 59) + '.sql'
+            };
+            resdata.push(t);
+        }
+        return [200, {flag: failOrNot(), data: resdata}];
+    });
+    bkd.whenPOST(ReqUrl.restoredb).respond(function (method, url, reqbody) {
+        console.log('mock backend->恢复数据库', reqbody);
+        return [200, {flag: failOrNot()}]
+    });
+
     function opLogs(limit) {
         var items = [];
         for (var i = 0; i < randInRange(0, limit || 15); i++) {
@@ -803,7 +834,7 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
     }
 
     bkd.whenPOST(ReqUrl.viewLog, function (reqbody) {
-        reqbody = JSON.parse(reqbody);
+        // reqbody = JSON.parse(reqbody);
         return reqbody.watch_type == 'op_log';
     }).respond(function () {
         console.log('mock backend ->操作日志');

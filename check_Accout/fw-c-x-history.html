@@ -31,7 +31,11 @@
                         重新对账
                     </p>
                 </div>
-                <div ng-show="!historyResults[m]">无</div>
+                <div ng-show="!historyResults[m]">
+                    <p>无结果</p>
+                    <p ng-show="year<=thisDate.getFullYear()&&m<=(thisDate.getMonth()+1)" class="btn btn-primary"
+                       title="进入该月对账流程，补上结果" ng-click="recheck(year, m, true)">补充对账</p>
+                </div>
             </td>
 
             <!--<td ng-show="historyResults['1']">
@@ -82,7 +86,11 @@
                         重新对账
                     </a>
                 </div>
-                <div ng-show="!historyResults[m]">无</div>
+                <div ng-show="!historyResults[m]">
+                    <p>无结果</p>
+                    <p ng-show="year<=thisDate.getFullYear()&&m<=(thisDate.getMonth()+1)" class="btn btn-primary"
+                       title="进入该月对账流程，补上结果" ng-click="recheck(year, m, true)">补充对账</p>
+                </div>
             </td>
 
             <!--<td ng-show="historyResults['7']"><a href="{{historyResults['7'].url}}" class="btn btn-primary"
