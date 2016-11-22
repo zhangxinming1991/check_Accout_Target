@@ -9,10 +9,15 @@ var ReqUrl = {
     // 注册
     signUp: '/check_Accout/PMController/as_register',
     // 注销（登出）
-    signOut: '/check_Accout/PMController/signout',
+    signOut: '/check_Accout/PMController/signout'
+    //找回密码->发送验证码
+    , rstPwdSendvc: '/check_Accout/PMController/getresetpwdverifycode'
+    //提交找回密码申请
+    , rstPwd:'/check_Accout/PMController/forgetandsendmail'
+
     // 财务人员->订单
     //   fwOrders:'/check_Accout/Check_MainController/upload_success',
-    fwOrders: '/check_Accout/Check_MainController/Watch',
+    , fwOrders: '/check_Accout/Check_MainController/Watch',
     // fwOrderMonths: '/fw/ordermonths',
     // 财务人员 上传
     fwOrderUpload: '/check_Accout/Check_MainController/upload',
@@ -80,22 +85,21 @@ var ReqUrl = {
 };
 
 // string format
-String.prototype.format = function()
-{
+String.prototype.format = function () {
     var args = arguments;
     return this.replace(/\{(\d+)\}/g,
-        function(m,i){
+        function (m, i) {
             return args[i];
         });
 };
 //static
-String.format = function() {
-    if( arguments.length == 0 )
+String.format = function () {
+    if (arguments.length == 0)
         return null;
 
     var str = arguments[0];
-    for(var i=1;i<arguments.length;i++) {
-        var re = new RegExp('\\{' + (i-1) + '\\}','gm');
+    for (var i = 1; i < arguments.length; i++) {
+        var re = new RegExp('\\{' + (i - 1) + '\\}', 'gm');
         str = str.replace(re, arguments[i]);
     }
     return str;

@@ -8,7 +8,7 @@ app.config(['$stateProvider', '$urlRouterProvider', 'stateHelperProvider', funct
     $urlRouterProvider.when('/u/fs', '/u/fs/a');
     $urlRouterProvider.when('/u/fw/p--', ['$state', function (state) {
         var thisDate = new Date();
-        state.go('u.fw.p', {year: thisDate.getFullYear(), month: thisDate.getMonth()+1});
+        state.go('u.fw.p', {year: thisDate.getFullYear(), month: thisDate.getMonth() + 1});
     }]);
     $urlRouterProvider.otherwise('/index');
 
@@ -20,7 +20,9 @@ app.config(['$stateProvider', '$urlRouterProvider', 'stateHelperProvider', funct
             url: '/index',
             template: '<img class="row" src="welcome.jpg">',
             controller: function () {
-                $('#loginModal').modal('show');
+                console.log('ctrl-> state-index-ctrl');
+                anyModal.modal('hide');
+                loginModal.modal('show');
             }
         })
 
@@ -53,8 +55,8 @@ app.config(['$stateProvider', '$urlRouterProvider', 'stateHelperProvider', funct
             abstract: true,
             url: '/u',
             template: '<div data-ui-view=""></div>',
-            controller: uCtrl,
-            children: [
+            controller: uCtrl
+            , children: [
                 // 财务人员
                 {
                     name: 'fw',
@@ -169,20 +171,20 @@ app.config(['$stateProvider', '$urlRouterProvider', 'stateHelperProvider', funct
                         },
                         {
                             name: 'v',
-                            url: '/v',
-                            views: {
-                                "": {
-                                    templateUrl: 'fw-c-n-grid.html',
-                                    controller: fwvCtrl
-                                }
+                            url: '/v'
+                            , views: {
+                            "": {
+                                templateUrl: 'fw-c-n-grid.html',
+                                controller: fwvCtrl
                             }
+                        }
                         }
                     ]
                 },
                 {
                     name: 'fs',     // system admin / maintaince
-                    url: '/fs',
-                    templateUrl: 'fs.html'
+                    url: '/fs'
+                    , templateUrl: 'fs.html'
                     , controller: fsCtrl
                     , children: [
                     {
@@ -212,4 +214,16 @@ app.config(['$stateProvider', '$urlRouterProvider', 'stateHelperProvider', funct
             ]
         })
     ;
+}]);
+
+
+app.run(['$rootScope', '$state', 'AccountService', function (rootsgop, state, AccSvc) {
+    rootsgop.$on("$stateChangeStart", function (event, toState, toParams, fromState, fromParams) {
+        if (toState.name.indexOf('u.') === 0 // auth needed
+            && !AccSvc.isAuthenticated()) {
+            // User isn’t authenticated
+            state.transitionTo("index");
+            event.preventDefault();
+        }
+    });
 }]);

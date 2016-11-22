@@ -1,7 +1,7 @@
 <div>
     <table st-table="dispItems" st-safe-src="items" class="table table-bordered table-striped">
-        <caption class="caption h3 text-center" title="">操作日志
-        </caption>
+        <!--<caption class="caption h3 text-center" title="">操作日志-->
+        <!--</caption>-->
         <thead>
         <tr>
             <th></th>
@@ -12,7 +12,7 @@
                        class="input-sm form-control">
             </th>
             <th>
-                <select st-search="usertype">
+                <select st-search="usertype" class="input-sm form-control">
                     <option value="">所有</option>
                     <option ng-repeat="p in items.itemTypes">{{p}}</option>
                 </select>

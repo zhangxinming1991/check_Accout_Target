@@ -173,6 +173,15 @@ app.run(['$httpBackend', '$timeout', '$q', function (bkd, timeout, Q) {
         return [200, {}, {}];
     });
 
+    // 发送验证码
+    bkd.whenPOST(ReqUrl.rstPwdSendvc).respond(function () {
+        return [200, {flag: failOrNot()}];
+    });
+    // 重置密码请求
+    bkd.whenPOST(ReqUrl.rstPwd).respond(function () {
+        return [200, {flag: failOrNot()}];
+    });
+
 
     // // get months
     // bkd.whenGET(ReqUrl.fwOrderMonths).respond(function () {

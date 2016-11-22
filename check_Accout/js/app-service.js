@@ -39,7 +39,7 @@ app.factory('HttpReqService', ['$http', '$q', function (http, Q) {
      * @returns {promise|*|d.promise|d}
      */
     svc.req = function (url, reqbody, okfnc, errfnc) {
-        //console.log('url, req:', url, reqbody);
+        console.log('url, req:', url, reqbody);
         var deferred = Q.defer();
         try {
             var encoded = reqbody === undefined || angular.equals(reqbody, {}) ? undefined : Encrypt(/*JSON.stringify*/(reqbody));
@@ -157,7 +157,7 @@ app.factory('AccountService', ['$rootScope', '$cookies', '$q', 'HttpReqService',
 
                 deferred.resolve(userInfo);
             }, function (errMsgObj) {
-                console.error(errMsgObj);
+                console.warn(errMsgObj);
                 deferred.reject(errMsgObj);
             });
         } catch (expt) {
@@ -166,6 +166,10 @@ app.factory('AccountService', ['$rootScope', '$cookies', '$q', 'HttpReqService',
         }
 
         return deferred.promise;
+    };
+
+    svc.isAuthenticated=function () {
+        return rootsgop.loggedInUser!==undefined;
     };
 
 // 浏览器标签页内自动登录
@@ -224,6 +228,14 @@ app.factory('AccountService', ['$rootScope', '$cookies', '$q', 'HttpReqService',
         return Req.req(ReqUrl.signUp, formUser, function (resbody) {
             return resbody.user;
         });
+    };
+
+    //找回密码相关
+    svc.rstPwdSendVC=function (form) {
+        return Req.req(ReqUrl.rstPwdSendvc,form);
+    };
+    svc.resetPwd=function (form) {
+        return Req.req(ReqUrl.rstPwd);
     };
 
 // 代理商列表获取，为注册时提供自动补全输入以及避免输入不存在的代理商

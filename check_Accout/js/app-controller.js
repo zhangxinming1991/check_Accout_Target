@@ -9,10 +9,14 @@ var loginSubmitBtn = loginForm.find('button[type="submit"]');
 var registerForm = $('#signUpForm');
 var registerModal = $('#registerModal');
 var regSubmitBtn = registerForm.find('button[type="submit"]');
+var resetPwdModal = $('#resetPwdModal');
+var resetPwdForm = $('#resetPwdForm');
+var rstPwdSubmitBtn = resetPwdForm.find('button:submit');
+var resetPwdVCRecvBtn = $('#resetPwdVCRecvBtn');
 var regLogModal = $('#loginModal,#registerModal');      // reg -> register, log -> login
 var signOutEntry = $('div[ng-show="loggedInUser"]');
 var regLogEntry = $('div[ng-hide="loggedInUser"]');
-// var regLogModal = $('.modal');
+var anyModal = $('.modal');
 
 // 首页
 app.controller('indexCtrl', ['$scope', '$state', '$rootScope', function ($scope, $state, rootsgop) {
@@ -29,11 +33,19 @@ app.controller('indexCtrl', ['$scope', '$state', '$rootScope', function ($scope,
     };
     $(document).on('keydown', $scope.disableKeyF5);
 
-    regLogModal.on('hidden.bs.modal', function () {
+    anyModal.on('hidden.bs.modal', function () {
+        // regLogModal.on('shown.bs.modal', function () {
         // console.info('hidden...', $(this));
         $(this).find('div.with-errors').html('');
     });
     // $('.modal').modal('hide');
+
+    // anyModal.on('hidden.bs.modal', function () {
+    //     console.info('hidden', $(this).attr('id'));
+    // });
+    // anyModal.on('shown.bs.modal', function () {
+    //     console.info('shown', $(this).attr('id'))
+    // });
 
     rootsgop.$on('$stateChangeSuccess', function (event, toState) {
         rootsgop.activeState = toState.name;
@@ -59,7 +71,14 @@ var signInCtrl = ['$scope', '$state', 'AccountService',
         var ctrl = sgop;
 
         sgop.submitForm = function () {
+            var formUser = sgop.formUser;
+
             if (loginForm.hasClass('ng-invalid')) {
+                ctrl.errMsg = '登陆表单有误';
+                return false;
+            }
+            if (!(formUser && formUser.upwd && formUser.uid)) {
+                ctrl.errMsg = '用户名、密码不能为空';
                 return false;
             }
 
@@ -67,7 +86,6 @@ var signInCtrl = ['$scope', '$state', 'AccountService',
             ctrl.errMsg = '登录中……';
             // // remove stored sign info
             // AccountService.removeStoredSignLocalInfo();
-            var formUser = sgop.formUser;
             AccountService.signIn(formUser).then(function (userInfo) {
                     goState(userInfo.role);
                 },
@@ -92,96 +110,225 @@ var signInCtrl = ['$scope', '$state', 'AccountService',
                     return;
             }
         }
+
+        loginModal.on('hidden.bs.modal', function () {
+            ctrl.formUser.upwd = '';
+            $(this).find(':password').each(function () {
+                this.value = '';
+            });
+        });
     }];
 app.controller('SignInCtrl', signInCtrl);
 
 // 注册
 var signUpCtrl = ['$scope', '$state', 'AccountService', '$uibModal', '$timeout',
-        function (sgop, $state, AccountService, msgbox, timeout) {
-            //console.log('sign up ctrl-> 注册用户');
+    function (sgop, $state, AccountService, msgbox, timeout) {
+        //console.log('sign up ctrl-> 注册用户');
 
-            var ctrl = this;
-            // for no 'controller as ctrl' grammar
-            // sgop.signUpCtrl=sgop;
-            // var ctrl = sgop;
+        var ctrl = this;
+        // for no 'controller as ctrl' grammar
+        // sgop.signUpCtrl=sgop;
+        // var ctrl = sgop;
 
-            ctrl.submitForm = function () {
+        ctrl.submitForm = function () {
 
-                if (registerForm.hasClass('ng-invalid')) {
-                    return false;
-                }
-                regSubmitBtn.attr('disabled');
-                ctrl.errMsg = '申请注册中……';
+            var pwd = ctrl.formUser.upwd;
+            if (!(
+                    pwd.length && pwd.length >= 8 && pwd.length <= 16       // 长度限制
+                    && /[0-9]/.test(pwd)
+                    && /[a-z]/.test(pwd)
+                    && /[A-Z]/.test(pwd)
+                )
+            ) {
+                ctrl.errMsg = '密码8-16位，必须有大小写字母和数字三种字符'
+                return false;
+            }
+            var pwdCfm = ctrl.formUser.upwdCfm;
+            if (pwdCfm != pwd) {
+                ctrl.errMsg = '两次输入的密码不一致';
+                return false;
+            }
 
-                var formUser = angular.copy(ctrl.formUser);
-                var m = {
-                    'U': 'bu',
-                    'M': 'bm'
-                };
-                formUser.role = m[formUser.role] || formUser.role;
-                formUser.renameProperty('uid', 'username');
-                formUser.renameProperty('upwd', 'password');
-                formUser.renameProperty('agent', 'agentid', function (agent) {
-                    return agent.code;
-                });
-                AccountService.signUp(formUser).then(function (resData) {
-                    // $state.go('login');
-                    registerModal/*$('.modal')*/.modal('hide');
-                    var boxInst = showMsg({
-                        msgbox: msgbox,
-                        title: '注册结果',
-                        msgHtml: '注册<strong class="text-success">成功</strong>，管理员将会审阅您的注册申请。'
-                    });
-                    timeout(function () {
-                        boxInst.close();
-                        loginModal.modal('show');
-                    }, msgOkTimeout);
-                }, function (err) {
-                    ctrl.errMsg = '注册失败：' + ensureErrMsg(err);
-                }).finally(function () {
-                });
+            if (registerForm.hasClass('ng-invalid')) {
+                ctrl.errMsg = '申请表有误';
+                return false;
+            }
+            regSubmitBtn.attr('disabled');
+            ctrl.errMsg = '申请注册中……';
+
+            var formUser = angular.copy(ctrl.formUser);
+            var m = {
+                'U': 'bu',
+                'M': 'bm'
             };
-
-
-            registerModal.on('shown.bs.modal', function () {
-                if (!sgop.agents || !sgop.agents.length) {
-                    (function refreshAgents() {
-                        AccountService.sellerAgents().then(function (items) {
-                            sgop.agents = items;
-                        }, function (errObj) {
-                        });
-                    })();
-                }
+            formUser.role = m[formUser.role] || formUser.role;
+            formUser.renameProperty('uid', 'username');
+            formUser.renameProperty('upwd', 'password');
+            formUser.renameProperty('agent', 'agentid', function (agent) {
+                return agent.code;
             });
-        }
-    ]
-    ;
+            AccountService.signUp(formUser).then(function (resData) {
+                // $state.go('login');
+                // registerModal/*$('.modal')*/.modal('hide');
+                anyModal.modal('hide');
+                var boxInst = showMsg({
+                    msgbox: msgbox,
+                    title: '注册结果',
+                    msgHtml: '注册<strong class="text-success">成功</strong>，管理员将会审阅您的注册申请。'
+                });
+                timeout(function () {
+                    boxInst.close();
+                    loginModal.modal('show');
+                }, msgOkTimeout);
+            }, function (err) {
+                ctrl.errMsg = '注册失败：' + ensureErrMsg(err);
+            }).finally(function () {
+            });
+        };
+
+
+        registerModal.on('shown.bs.modal', function () {
+            if (!sgop.agents || !sgop.agents.length) {
+                (function refreshAgents() {
+                    AccountService.sellerAgents().then(function (items) {
+                        sgop.agents = items;
+                    }, function (errObj) {
+                    });
+                })();
+            }
+        });
+
+        registerModal.on('hidden.bs.modal', function () {
+            ctrl.formUser.upwd = ctrl.formUser.upwdCfm = '';
+            $(this).find(':password').each(function () {
+                this.value = '';
+            });
+        });
+    }];
 app.controller('SignUpCtrl', signUpCtrl);
 
-var resetPasswordCtrl = ['$scope', '$state', 'AccountService',
-    function ($scope, $state, AccountService) {
-        //console.log('reset password 忘记密码');
+var resetPwdCtrl = ['$scope', '$state', 'AccountService', '$uibModal', '$interval', '$timeout',
+    function (sgop, $state, AccSvc, msgbox, interval, timeout) {
+        console.log('ctrl->resetPwdCtrl 找回密码');
+
+        var ctrl = this;
+
+        resetPwdModal.on('shown.bs.modal', function () {
+            // console.info('rst modal shown', ctrl.form);
+            ctrl.form.vc = '';        // failed to reset
+        });
+        ctrl.vcRecv = function () {
+            function vcRecvBtnMsg(msg) {
+                ctrl.vcRecvBtnTip.msg = msg;
+                ctrl.vcRecvBtnTip.isOpen = true;
+                timeout(function () {
+                    ctrl.vcRecvBtnTip.isOpen = false;
+                }, 1500);
+            }
+
+            if (!ctrl.form.uid) {
+                vcRecvBtnMsg('请填写用户名');
+                return false;
+            }
+
+            var wait = 60;
+            var remain = wait;
+            resetPwdVCRecvBtn.prop('disabled', true);
+            var timer = interval(function () {
+                resetPwdVCRecvBtn.text('获取验证码（' + remain + '）秒');
+                remain--;
+                if (remain <= 0) {
+                    resetVCRecvBtn();
+                }
+            }, 1000, wait);
+
+            function resetVCRecvBtn() {
+                interval.cancel(timer);
+                resetPwdVCRecvBtn.prop('disabled', false);
+                resetPwdVCRecvBtn.text('获取验证码');
+            }
+
+            AccSvc.rstPwdSendVC({
+                username: ctrl.form.uid
+                , verify_way: ctrl.form.vcRecvWay
+            }).then(function (ok) {
+                vcRecvBtnMsg('发送成功，请查收')
+            }, function (errObj) {
+                vcRecvBtnMsg('发送失败，错误：' + ensureErrMsg(errObj));
+                resetVCRecvBtn();
+            });
+        };
+
+        ctrl.submitForm = function () {
+            if (!ctrl.form.uid || !ctrl.form.vc) {
+                ctrl.errMsg = '用户名、验证码不能为空';
+                return false;
+            }
+            var msgCfg = {
+                msgbox: msgbox
+                , title: '重置密码'
+                , msgHtml: '操作<strong>进行中……</strong>'
+                , important: true
+                , noCloseBtn: true
+                , ctrl: ['$scope', '$uibModalInstance', function (sgop, boxInst) {
+                    sgop.msgCfg = msgCfg;
+                    sgop.closeMsgbox = function () {
+                        boxInst.close();
+                        if (msgCfg.opRlt) {
+                            // close messge box
+                            loginModal.modal('show');
+                        } else {
+                            ctrl.errMsg = '操作失败';
+                            resetPwdModal.modal('show');
+                        }
+                    };
+                }]
+            };
+            rstPwdSubmitBtn.prop('disabled', true);
+            resetPwdModal.modal('hide');
+            var boxInst = showMsg(msgCfg);
+            AccSvc.resetPwd({username: ctrl.form.uid, verify_code: ctrl.form.vc})
+                .then(function (ok) {
+                    msgCfg.msgHtml = '操作<strong class="text-success">成功</strong>';
+                    msgCfg.opRlt = true;
+                }, function (errObj) {
+                    msgCfg.msgHtml = '操作<strong class="text-warning">失败</strong>，错误：' + ensureErrMsg(errObj);
+                    msgCfg.opRlt = false;
+                })
+                .finally(function () {
+                    msgCfg.noCloseBtn = false;
+                    rstPwdSubmitBtn.prop('disabled', false);
+
+                });
+        };
     }];
+app.controller('ResetPwdCtrl', resetPwdCtrl);
+
 // 对于直接通过URL访问需要授权信息页面的情况（#/u/*, #/u/fw,#/fs, #/u/sa），Javascript环境已没有任何用户登陆信息，如何自动登陆？
 // 已#/u打头的路径，需要授权信息，需检测是否已登陆，如果没有,或者自动登陆、或者弹窗登陆、或者跳转登陆页面
 var uCtrl = ['$scope', '$state', 'AccountService', '$timeout', '$uibModal', 'FncRmindService', 'ChkRsltSvc', function (sgop, state, AccSvc, timeout, msgbox, NotifSvc, ChkSvc) {
     //console.log('uCtrl');
 
     regLogModal.modal('hide');
-
-    //如果未登录
-    if (sgop.loggedInUser === undefined) {
-        // todo go login?  auto-login? popup-login?
-        // console.log('trying to re-login by: ',sessionStorage, sessionStorage.getItem('formUser'));
-        AccSvc.signInBySessionStorage().then(function () {
-            //console.info('自动登录（session storage）');
-        }, function (fail) {
-            state.go('index');
-        });
-    } else {
-        // logged in ?
-        // pass through
-    }
+    //
+    // //如果未登录
+    // if (sgop.loggedInUser === undefined) {
+    //     // todo go login?  auto-login? popup-login?
+    //     var reLoged = false;
+    //     // console.log('trying to re-login by: ',sessionStorage, sessionStorage.getItem('formUser'));
+    //     AccSvc.signInBySessionStorage().then(function () {
+    //         //console.info('自动登录（session storage）');
+    //         reLoged = true;
+    //     }, function (fail) {
+    //     });
+    //     if (!reLoged) {
+    //         state.go('index');
+    //         return;
+    //     }
+    // } else {
+    //     // logged in ?
+    //     // pass through
+    // }
 
     var ctrl = sgop.$root;
 
@@ -464,8 +611,7 @@ function showMsg(msgCfg/*msgbox, title, msgHtml*/) {
         backdrop: msgCfg.backdrop === undefined ? !msgCfg.important : msgCfg.backdrop,
         keyboard: msgCfg.keyboard === undefined ? !msgCfg.important : msgCfg.keyboard,   // if undefined, can close by ESC
         size: msgCfg.msgboxSize || 'md',
-    })
-        ;
+    });
 }
 
 

@@ -1,5 +1,5 @@
 <div>
-    <div><p class="text-center h2">用户注册审阅</p></div>
+    <!--<div><p class="text-center h2">用户注册审阅</p></div>-->
     <uib-tabset>
         <uib-tab>
             <uib-tab-heading>
@@ -7,7 +7,7 @@
             </uib-tab-heading>
             <div ng-controller="fsanCtrl">
                 <table st-table="dispItems" st-safe-src="items" class="table table-bordered table-striped">
-                    <caption class="caption h3 text-center" title="">待审对账联系人
+                    <caption class="caption h5 text-center" title="">客户审阅
                     </caption>
                     <thead>
                     <tr>
@@ -24,10 +24,10 @@
                         </th>
                         <th><input st-search="weixin" placeholder="微信号" type="search" class="input-sm form-control">
                         </th>
-                        <th><input st-search="company" placeholder="个人信息/单位名称" type="search"
+                        <th><input st-search="company" placeholder="名称（姓名）" type="search"
                                    class="input-sm form-control">
                         </th>
-                        <th><input st-search="companyid" placeholder="证件号/单位代码" type="search"
+                        <th><input st-search="companyid" placeholder="单位代码/证件号" type="search"
                                    class="input-sm form-control">
                         </th>
                         <th>
@@ -52,11 +52,11 @@
                         <th st-sort="phone">电话</th>
                         <th st-sort="email">邮箱</th>
                         <th st-sort="weixin">微信号</th>
-                        <th st-sort="company" title="个人信息或所属单位名称">个人信息/单位名称</th>
-                        <th st-sort="companyid">证件号/单位代码</th>
-                        <th st-sort="registerWay">商户类型</th>
+                        <th st-sort="company" title="个人信息或所属单位名称"><!--个人信息/单位名称-->名称（姓名）</th>
+                        <th st-sort="companyid">单位代码/证件号</th>
+                        <th st-sort="registerWay"><!--商户类型-->类型</th>
                         <th st-sort="agent">所属代理商</th>
-                        <th st-sort="contractMes" title="用以验证注册用户有效性的证据">注册凭证（合同号）</th>
+                        <th st-sort="contractMes" title="用以验证注册用户有效性的证据">注册凭证</th>
                         <th>操作</th>
                     </tr>
                     </thead>
@@ -78,7 +78,7 @@
                         <td>{{t.registerWay}}</td>
                         <td>{{t.agent}}</td>
                         <td>{{t.contractMes}}</td>
-                        <td>
+                        <td style="white-space: nowrap">
                             <button ng-click="acceptNotifier(t)" class=" btn btn-default">通过</button>
                             <button ng-click="rejectNotifier(t)" class="btn btn-default">拒绝</button>
                         </td>
@@ -115,7 +115,7 @@
             </uib-tab-heading>
             <div ng-controller="fsawCtrl">
                 <table st-table="dispItems" st-safe-src="items" class="table table-bordered table-striped">
-                    <caption class="caption h3 text-center" title="">待审代理商财务员
+                    <caption class="caption h5 text-center" title="">代理商财务审阅
                     </caption>
                     <thead>
                     <tr>
@@ -130,11 +130,12 @@
                         </th>
                         <th><input st-search="email" placeholder="邮箱" type="search" class="input-sm form-control">
                         </th>
-                        <th><input st-search="companyid" placeholder="单位代码" type="search"
+                       <!-- <th><input st-search="companyid" placeholder="单位代码" type="search"
                                    class="input-sm form-control">
-                        </th>
+                        </th>-->
                         <th><input st-search="agentid" placeholder="所属代理商" type="search" class="input-sm form-control">
                         </th>
+                        <th></th>
                     </tr>
                     <tr>
                         <th>序号</th>
@@ -142,7 +143,7 @@
                         <th st-sort="name">真实姓名</th>
                         <th st-sort="phone">电话</th>
                         <th st-sort="email">邮箱</th>
-                        <th st-sort="companyid">单位代码</th>
+                        <!--<th st-sort="companyid">单位代码</th>-->
                         <th st-sort="agentid">所属代理商</th>
                         <th>操作</th>
                     </tr>
@@ -155,9 +156,9 @@
                         <td>{{t.name}}</td>
                         <td>{{t.phone}}</td>
                         <td>{{t.email}}</td>
-                        <td>{{t.companyid}}</td>
+                        <!--<td>{{t.companyid}}</td>-->
                         <td>{{t.agentid}}</td>
-                        <td>
+                        <td style="white-space: nowrap">
                             <button ng-click="accept(t)" class=" btn btn-default">通过</button>
                             <button ng-click="reject(t)" class="btn btn-default">拒绝</button>
                         </td>
