@@ -231,7 +231,7 @@ var resetPwdCtrl = ['$scope', '$state', 'AccountService', '$uibModal', '$interva
                 return false;
             }
 
-            var wait = 60;
+            var wait = 180;
             var remain = wait;
             resetPwdVCRecvBtn.prop('disabled', true);
             var timer = interval(function () {
